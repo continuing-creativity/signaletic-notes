@@ -1,0 +1,41 @@
+{
+    nodes: {
+        carrier: {
+            type: "signal.oscillator", // this refers to a built-in Web Audio node (an OscillatorNode)
+            shape: "saw",
+            frequency: 440
+        },
+
+        carrierAmp: {
+            type: "signal.gain"
+        },
+
+        ampEnv: {
+            type: "signal.adsr", // this is a custom JS component that will ship as part of the library
+
+            // These, of course, will have sensible defaults so that a user
+            // doesn't have to explicitly define all parameters.
+            startLevel: 0.0,
+            attackTime: 0.1,
+            attackLevel: 1.0,
+            decayTime: 0.1,
+            sustainLevel: 0.8,
+            releaseTime: 0.1,
+            releaseLevel: 0.0
+        },
+    },
+
+    // osc -> gain -> (env) -> destination
+    connections: {
+        // source: destination
+        // Note that here we are explicit about specifying the input and output number.
+        // The Web Audio API's Node.connect(node, inputNum, outputNum) method provides defaults for the latter two arguments,
+        // so we can (should?) also reflect this optionality in Signaletics and automatically expand to the 0th input/output.
+        "carrier.outputs.0": "carrierAmp.inputs.0",
+        "ampEnv.outputs.0": "carrierAmp.gain",
+        "carrierAmp.outputs.0": "output"
+            // "output" is a reserved name
+            // representing this graph fragment's "tail node"
+            // and which can be routed to the AudioContext's destination node.
+    }
+}

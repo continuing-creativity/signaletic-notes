@@ -1,0 +1,23 @@
+ {
+     "name": "signaletic",
+     "description": "A library for developing declarative, portable Web Audio instruments.",
+     "version": "0.0.1",
+     "author": "OCAD University",
+     "license" : "BSD-3-Clause",
+     "homepage": "https://github.com/fluid-studios/signaletic",
+     "repository": "git://github.com/fluid-studios/signaletic.git",
+     "keywords": [
+        "web audio",
+        "sonification",
+        "audio",
+        "music",
+        "sound art"
+     ],
+     "devDependencies": {
+        "grunt": "1.0.1",
+        "fluid-grunt-eslint": "18.1.2",
+        "eslint-config-fluid": "1.0.0",
+        "grunt-jsonlint": "1.1.0",
+        "fluid-grunt-json5lint": "1.0.0"
+     }
+ }
