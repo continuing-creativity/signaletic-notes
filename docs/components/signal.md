@@ -16,10 +16,12 @@ A signal may wrap a single Web Audio node, or it may be a composite for a subgra
 
         signals: {
             signalLocalName: {
-                type: "global.name.of.signal",
+                type: "global.signal.creator",
 
-                // TODO: Should this be more structured?
-                <key corresponding to option, prop, or audioparam>: <value>
+                options: {
+                    // TODO: Should this be more structured?
+                     <key corresponding to option, prop, or audioparam>: <value>
+                }
             }
         },
 
@@ -37,4 +39,6 @@ A signal may wrap a single Web Audio node, or it may be a composite for a subgra
         parameters: {
             <param name>: "{<node name>}.<audio param name>"
         }
+
+        // TODO: What about exposing properties of contained signals?
     });

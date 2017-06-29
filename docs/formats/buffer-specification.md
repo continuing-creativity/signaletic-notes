@@ -22,3 +22,6 @@ Directly specifies the samples of a buffer.
             [/* channel 1's samples */]
         ]
     }
+
+## Function Buffer Source
+Specifies a function that will be invoked per sample to fill a new mono-channel buffer.
