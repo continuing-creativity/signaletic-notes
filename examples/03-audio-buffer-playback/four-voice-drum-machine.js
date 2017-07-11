@@ -13,91 +13,97 @@ signal.buffer.reverbImpulseResponse = function (buffer, channel, sampleIndex, de
 signal.define("signal.distortion", {
     type: "signal.signal",
 
-    buffers: {
+    components: {
         distortionCurve: {
             type: "signal.buffer.functionSource",
             funcName: "signal.buffer.distortionCurve",
             // TODO: How do we express a dependency on a property?
-            args: ["{amount}"],
+            // This function will need to be data bound to the
+            // {that}.amount property
+            args: ["{that}.amount"],
             numChannels: 1,
             length: 8192
-        }
-    },
+        },
 
-    signals: {
         distortion: {
             type: "signal.waveshaper",
-            // TODO: How do we express a reference to
-            // the distortionCurve buffer,
-            // since the WaveShaperNode
-            // expects to get a raw Float32Array
-            curve: "{buffers}.distortionCurve.channelData.0"
+            // TODO: We will need some kind of schematic information
+            // about a waveshaper so that we know it accepts a mono Float32Array
+            // instead of an AudioBuffer.
+            // Alternatively, Buffer-consuming Signals will need to be able
+            // to accept any type of buffer and do the right thing.
+            curve: "{distortionCurve}"
         }
     },
 
     inputs: ["{distortion}.0"],
     outputs: ["{distortion}.0"],
     parameters: {},
-    properties: {
-        amount: {
-            value: 50,
-            onChange: [
-                {
-                    func: "{that}.refreshBuffer",
-                    args: ["distortionCurve"]
-                }
-            ]
-        }
-    }
+
+    amount: 50
 });
 
 signal.define("signal.reverb", {
     type: "signal.signal",
 
-    buffers: {
+    components: {
         impulseResponse: {
             type: "signal.buffer.functionSource",
             funcName: "signal.buffer.reverbImpulseResponse",
-            args: [2.0], // TODO: Also needs to be expressed dynamically!
+            args: ["{that}.duration"], // TODO: Also needs to be expressed dynamically!
             numChannels: 2,
             length: 132300 // TODO: This needs to be expressed dynamically
                            // based on a property and the current
                            // sample rate!
-        }
-    },
+        },
 
-    signals: {
         convolver: {
             type: "signal.convolver",
-            normalize: true
+            normalize: true,
+            buffer: "{impulseResponse}"
         }
     },
 
     inputs: ["{convolver}.0"],
     outputs: ["{convolver}.0"],
-    properties: {
-        "duration": "", // TODO: See above.
-        "decay": "" // TODO: See above.
-    }
+    duration: 2.0, // TODO: See above.
+    decay: 3.0 // TODO: See above.
 });
 
 signal.define("example.drumVoice", {
     type: "signal.signal",
 
-    signals: {
+    components: {
         bufferPlayer: {
             type: "signal.bufferPlayer",
-            buffer: "snare"
         },
 
         distortion: {
-            type: "signal.distortion"
+            type: "signal.distortion",
+            inputs: {
+                "0": "{bufferPlayer}.outputs.0"
+            }
         },
 
         reverb: {
             type: "signal.reverb",
             duration: 3,
-            decay: 2
+            decay: 2,
+            inputs: {
+                "0": "{distortion}.outputs.0"
+            }
+        },
+
+        cutoffFrequency: {
+            type: "signal.value",
+            value: 1000
+        },
+
+        q: {
+            type: "signal.value",
+            inputs: {
+                value: 12
+            }
         },
 
         lpf: {
@@ -105,16 +111,18 @@ signal.define("example.drumVoice", {
             filterType: "lowpass" // TODO: Name clash with above!
                                   // The property specified in the
                                   // Web Audio API for this is "type".
+            inputs: {
+                "0": "{reverb}.outputs.0",
+                q: "{q}.outputs.0",
+                frequency: "{cutoffFrequency}.output.0"
+            }
         },
 
-        q: {
+        amp: {
             type: "signal.value",
-            value: 12
-        },
-
-        cutoffFrequency: {
-            type: "signal.value",
-            value: 1000
+            inputs: {
+                value: 0.8
+            }
         },
 
         ampEnv: {
@@ -124,85 +132,72 @@ signal.define("example.drumVoice", {
             attackLevel: 1.0,
             sustainTime: 1.0,
             releaseTime: 0.25,
-            releaseLevel: 0.0
-        },
-
-        amp: {
-            type: "signal.value",
-            value: 0.8
+            releaseLevel: 0.0,
+            inputs: {
+                "0": "{lpf}.outputs.0",
+                gain: "{amp}.outputs.0"
+            }
         }
-    },
-
-    connections: {
-        "{bufferPlayer}.0": "{distortion}.0",
-        "{distortion}.0": "{reverb}.0",
-        "{reverb}.0": "{lpf}.0",
-        "{q}": "{lpf}.q",
-        "{cutoffFrequency}": "{lpf}.frequency",
-        "{lpf}": "{ampEnv}",
-        "{amp}": "{ampEnv}.gain"
     }
 });
 
 signal.define("example.drumMachine", {
     type: "signal.signal",
 
-    buffers: {
-        kick: {
+    components: {
+        kickBuffer: {
             type: "signal.buffer.urlSource",
             url: "audio/kick-drum.mp3"
         },
 
-        snare: {
+        snareBuffer: {
             type: "signal.buffer.urlSource",
             // Not really a snare sound, but you get the idea!
             url: "data:audio/wav;base64,UklGRngAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVQAAAAAAM0MmRlmJjMzAEDMTJlZZmYyc/9/MnNmZplZzEwAQDMzZiaZGc0MAAAz82fmmtnNzADANLNnppqZzowBgM6MmplnpjSzAMDNzJrZZ+Yz8wAAzQw="
         },
 
-        hihat: {
+        hihatBuffer: {
             type: "signal.buffer.urlSource",
             url: "audio/hihat.mp3"
         },
 
-        clap: {
+        clapBuffer: {
             type: "signal.buffer.urlSource",
             url: "audio/clap.mp3"
-        }
-    },
+        },
 
-    signals: {
         kick: {
             type: "signal.drumVoice",
-            signals: {
+            components: {
                 bufferPlayer: {
-                    bufferName: "kick"
+                    buffer: "{kickBuffer}"
                 }
             }
         },
 
         snare: {
             type: "signal.drumVoice",
-            signals: {
+            components: {
                 bufferPlayer: {
-                    bufferName: "snare"
+                    buffer: "{snareBuffer}"
                 }
             }
         },
 
         hihat: {
             type: "signal.drumVoice",
-            signals: {
+            components: {
                 bufferPlayer: {
-                    bufferName: "hihat"
+                    buffer: "{hihatBuffer}"
                 }
             }
         },
 
         clap: {
             type: "signal.drumVoice",
-            signals: {
+            components: {
                 bufferPlayer: {
-                    bufferName: "clap"
+                    buffer: "{clapBuffer}"
                 }
             }
         }

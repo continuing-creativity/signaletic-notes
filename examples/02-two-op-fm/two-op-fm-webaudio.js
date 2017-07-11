@@ -5,7 +5,7 @@
 /*
 Here, we are assuming that:
    * Nodes such as ConstantSourceNode have been implemented or polyfilled
-   * Crucial wrappers such as EnvGen have been implemented (though their APIs may be fuzzy)
+   * Crucial signals such as EnvGen have been implemented
    * Other "semantic" Nodes such as Value, Mul, Add, etc. are not present
 */
 
