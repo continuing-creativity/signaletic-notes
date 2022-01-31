@@ -1,0 +1,12 @@
+{
+    "extends": "eslint-config-fluid",
+    "globals": {
+        "fluid": true,
+        "signal": true
+    },
+
+    "env": {
+        "browser": "true",
+        "node": "false"
+    }
+}
