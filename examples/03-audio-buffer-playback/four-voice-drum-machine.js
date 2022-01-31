@@ -36,7 +36,9 @@ signal.define("signal.distortion", {
         }
     },
 
-    inputs: ["{distortion}.0"],
+    inputs: {
+        "0": "{distortion}.0"
+    },
     outputs: ["{distortion}.0"],
     parameters: {},
 
@@ -108,7 +110,7 @@ signal.define("example.drumVoice", {
 
         lpf: {
             type: "signal.biquadFilter",
-            filterType: "lowpass" // TODO: Name clash with above!
+            filterType: "lowpass", // TODO: Name clash with above!
                                   // The property specified in the
                                   // Web Audio API for this is "type".
             inputs: {

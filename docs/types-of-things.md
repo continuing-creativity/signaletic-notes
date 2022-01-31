@@ -9,7 +9,7 @@
 ## Signals
 Signals wrap Web Audio Nodes and allow for arbitrary composition of other Signals into "subgraphs" or "synths." They can be named and defined using the <code>signal.define()</code> function.
 
-Signals can declare inputs, outputs, AudioParams, and propeties. In the case of the former three, however, they must always be mapped to an actual Node's inputs or AudioParams.
+Signals can declare inputs, outputs, AudioParams, and properties. In the case of the former three, however, they must always be mapped to an actual Node's inputs or AudioParams.
 
 ## Buffers
 Buffers contain audio samples, curves, impulse responses, or other sequential data used by Nodes. In the Web Audio API, there are two types of buffers:
